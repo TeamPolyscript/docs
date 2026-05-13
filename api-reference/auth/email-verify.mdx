@@ -1,6 +1,6 @@
 ---
 title: "Email verify / resend / change"
-description: "6-digit code verification flow for signup and email-change."
+description: "Polyscript email verification endpoints: confirm a 6-digit code, resend an expired code, and change the email address linked to an account."
 ---
 
 The same `/auth/email/verify` endpoint handles both signup verification and email-change confirmation. The server distinguishes by the `purpose` field stored in the verification record (`signup` | `email_change`).
