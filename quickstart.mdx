@@ -1,0 +1,55 @@
+---
+title: "Quickstart"
+description: "Get to your first running strategy in under 10 minutes."
+---
+
+## 1. Create an account
+
+<Steps>
+  <Step title="Sign up">
+    Visit [polyscript.io/signup](https://polyscript.io/signup) and create an account with email + password, or with Google.
+  </Step>
+  <Step title="Verify your email">
+    If you signed up with email, enter the 6-digit code we send. The code expires in 5 minutes — you can re-request it.
+  </Step>
+  <Step title="Pick a handle">
+    Your handle (`@yourhandle`) is the public identifier for your strategies. Discord-style — lowercase letters, numbers, `.`, `_`. 2–32 characters.
+  </Step>
+</Steps>
+
+## 2. Write a strategy (coming soon)
+
+<Note>
+  The Python SDK is in private beta. Initial release scheduled for Q3 2026.
+</Note>
+
+Skeleton:
+
+```python
+from polyscript import Strategy, Market
+
+class MyStrategy(Strategy):
+    def on_tick(self, market: Market):
+        # Your logic here
+        if market.yes_price < 0.30:
+            self.buy(market, shares=10)
+```
+
+## 3. Backtest
+
+```bash
+polyscript backtest my_strategy.py --from 2025-01-01 --to 2025-12-31
+```
+
+## 4. Deploy
+
+```bash
+polyscript deploy my_strategy.py
+```
+
+Monitor live performance from your dashboard.
+
+## Need help?
+
+- [API Reference](/api-reference/overview) — programmatic access
+- Email [support@polyscript.io](mailto:support@polyscript.io)

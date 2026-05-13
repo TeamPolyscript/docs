@@ -1,0 +1,120 @@
+---
+title: "Login / Logout / Session"
+description: "Email-password sign-in, sign-out, and current-user inspection."
+---
+
+## Login
+
+```http
+POST /auth/login
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "you@example.com",
+  "password": "verystrong123"
+}
+```
+
+<ParamField body="email" type="string" required />
+<ParamField body="password" type="string" required />
+
+On success, returns the user's `public_profile` and sets the `access_token` cookie.
+
+### Response
+
+```json
+{
+  "sub": "7245899304398397440",
+  "email": "you@example.com",
+  "handle": "yourhandle",
+  "display_name": "Your Name",
+  "picture": null,
+  "pending": false,
+  "created_at": 1747140120000
+}
+```
+
+### Errors
+
+- `401 invalid_email_or_password` — generic, doesn't leak which field is wrong
+- `429` — more than 10 attempts per minute
+
+---
+
+## Logout
+
+```http
+POST /auth/logout
+```
+
+Clears the `access_token` cookie (matching domain/path/secure/samesite of the original).
+
+```json
+{ "ok": true }
+```
+
+---
+
+## Current user (`me`)
+
+```http
+GET /auth/me
+Cookie: access_token=...
+```
+
+Returns the same `public_profile` shape as `/auth/login`.
+
+```json
+{
+  "sub": "7245899304398397440",
+  "email": "you@example.com",
+  "handle": "yourhandle",
+  "display_name": "Your Name",
+  "picture": null,
+  "pending": false,
+  "created_at": 1747140120000
+}
+```
+
+### Errors
+
+- `401 not_authenticated` — cookie missing
+- `401 token_expired` — JWT past `exp`
+- `401 session_no_longer_valid` — user deleted
+
+---
+
+## Onboarding
+
+After signup + email verify, complete the profile:
+
+```http
+POST /auth/onboarding
+Cookie: access_token=...
+Content-Type: application/json
+```
+
+```json
+{
+  "handle": "yourhandle",
+  "displayName": "Your Name"
+}
+```
+
+<ParamField body="handle" type="string" required>
+  2–32 chars, lowercase, `[a-z0-9._]`. No leading/trailing dots, no `..`.
+  Not in [reserved list](https://github.com/marteinn/The-Big-Username-Blocklist) + brand reserves.
+</ParamField>
+
+<ParamField body="displayName" type="string" required>
+  Minimum 2 characters.
+</ParamField>
+
+### Errors
+
+- `400 invalid_handle` — format violation
+- `400 invalid_display_name` — < 2 chars
+- `400 handle_taken` — already in use
+- `400 email_not_verified` — must complete email verify first (email signup users)

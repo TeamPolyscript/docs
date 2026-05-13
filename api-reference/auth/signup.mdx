@@ -1,0 +1,60 @@
+---
+title: "Signup"
+description: "Create a new account with email + password."
+api: "POST https://api.polyscript.io/auth/signup"
+---
+
+## Request
+
+```http
+POST /auth/signup
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "you@example.com",
+  "password": "verystrong123"
+}
+```
+
+### Body
+
+<ParamField body="email" type="string" required>
+  Valid email address. Normalized to lowercase before storage.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Minimum 8 characters. Stored as bcrypt hash (cost 12).
+</ParamField>
+
+## Behavior
+
+1. Validates email format and password length.
+2. If a pending account exists for this email, the record is reused (idempotent re-signup).
+3. Creates `users` and `passwords` records.
+4. Generates a 6-digit verification code (bcrypt hashed) and sends it to the email via Resend.
+5. Returns a `pending` JWT session cookie. The session is "pending" until the email is verified.
+
+## Response
+
+<ResponseField name="ok" type="boolean">Always `true` on success.</ResponseField>
+
+Sets `access_token` cookie (httpOnly, samesite=lax, domain=`.polyscript.io`).
+
+```json
+{ "ok": true }
+```
+
+## Errors
+
+| Status | Error | Cause |
+|---|---|---|
+| 400 | `invalid_email` | Email format invalid |
+| 400 | `password_too_short` | < 8 characters |
+| 400 | `email_taken` | Email belongs to a fully onboarded user |
+| 429 | rate limited | More than 5 signups/hour from this IP |
+
+## Next step
+
+Send the user to enter the 6-digit code — see [`/auth/email/verify`](/api-reference/auth/email-verify).

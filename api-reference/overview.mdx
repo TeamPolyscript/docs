@@ -1,0 +1,72 @@
+---
+title: "API Overview"
+description: "Authentication-first HTTP API for polyscript.io"
+---
+
+## Base URL
+
+```
+https://api.polyscript.io
+```
+
+## Authentication
+
+All authenticated endpoints expect an **httpOnly session cookie** named `access_token`, issued by `/auth/login`, `/auth/signup`, or `/auth/google/callback`. The cookie is scoped to `.polyscript.io` and sent with `credentials: 'include'` from browsers.
+
+Programmatic clients can alternatively send the JWT as a Bearer token:
+
+```
+Authorization: Bearer <jwt>
+```
+
+## Path conventions
+
+| Pattern | When |
+|---|---|
+| Flat (`/auth/signup`, `/auth/me`) | actions on the auth domain as a whole |
+| Hierarchical (`/auth/email/verify`, `/auth/password/reset`) | actions on a specific auth resource |
+| `GET` vs `POST` on same path | `GET` is a read-only peek, `POST` performs the action |
+
+## Response shape
+
+Success:
+```json
+{ "ok": true }
+```
+
+Or the relevant resource (e.g., user profile from `/auth/me`).
+
+Errors (4xx):
+```json
+{
+  "error": "wrong_code",
+  "message": "Incorrect code.",
+  "attempts_left": 3
+}
+```
+
+- `error` — `snake_case` machine-readable code
+- `message` — human-readable English string
+- additional fields per endpoint
+
+## Rate limits
+
+| Endpoint | Limit |
+|---|---|
+| `/auth/login` | 10 / min / IP |
+| `/auth/signup` | 5 / hour / IP |
+| `/auth/onboarding` | 5 / hour / IP |
+| `/auth/email/resend` | 5 / hour / IP |
+| `/auth/email/change` | 3 / hour / IP |
+| `/auth/password/recovery` | 3 / hour / IP |
+| `/auth/handle/check` | 60 / min / IP |
+
+429 responses include `retry_after` (seconds).
+
+## Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api-reference/auth/signup">
+    `/auth/*` — signup, login, sessions, email verification, password reset, Google OAuth
+  </Card>
+</CardGroup>

@@ -1,0 +1,57 @@
+---
+title: "Handle availability"
+description: "Check if a handle is free, taken, reserved, or malformed."
+---
+
+```http
+GET /auth/handle/check?value=<handle>
+```
+
+Public endpoint — no auth. Used by the frontend during onboarding to validate handle availability in real time (debounced ~400ms after typing stops).
+
+## Query
+
+<ParamField query="value" type="string" required>
+  The handle to check. Will be normalized (lowercase + trim) server-side.
+</ParamField>
+
+## Response
+
+```json
+{ "available": true }
+```
+
+or
+
+```json
+{ "available": false, "reason": "taken" }
+```
+
+### `reason` values
+
+| Value | Meaning |
+|---|---|
+| `invalid_format` | Doesn't match the handle regex (2–32 chars, `[a-z0-9._]`, no `..`, no leading/trailing dot) |
+| `reserved` | Matches the [community blocklist](https://github.com/marteinn/The-Big-Username-Blocklist) (~540 entries) or polyscript-specific reserves |
+| `taken` | Already in use by an existing user |
+
+## Rate limit
+
+`60 / minute / IP` — generous because the frontend calls this on every keystroke (after debounce).
+
+## Example
+
+```bash
+curl https://api.polyscript.io/auth/handle/check?value=admin
+# {"available":false,"reason":"reserved"}
+
+curl https://api.polyscript.io/auth/handle/check?value=ab
+# {"available":false,"reason":"invalid_format"}    # too short
+
+curl https://api.polyscript.io/auth/handle/check?value=myunique.handle
+# {"available":true}
+```
+
+## Race condition warning
+
+Availability at check time doesn't guarantee success at onboarding time. The actual uniqueness check is enforced by a Mongo unique index on `users.handle`. If two users race to the same handle, only one succeeds at `/auth/onboarding` (the other gets `400 handle_taken`).

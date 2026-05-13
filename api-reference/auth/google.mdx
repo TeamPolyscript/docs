@@ -1,0 +1,67 @@
+---
+title: "Google OAuth"
+description: "Sign in / sign up with Google."
+---
+
+Server-side OAuth flow. Browser navigates the user through redirects — no client-side token handling.
+
+## Initiate
+
+```http
+GET /auth/google/login
+```
+
+Server responds with `302` to Google's authorize endpoint:
+
+```
+Location: https://accounts.google.com/o/oauth2/v2/auth
+  ?response_type=code
+  &client_id=...
+  &redirect_uri=https://api.polyscript.io/auth/google/callback
+  &scope=openid+email+profile
+  &state=...
+  &nonce=...
+```
+
+## Callback
+
+```http
+GET /auth/google/callback?code=...&state=...
+```
+
+Server exchanges the code for a Google ID token, then:
+
+1. **Matches by `(provider, providerSub)`** — same Google account before? Use that user.
+2. **Falls back to email match** — same email used for an existing user? Link the Google account (`oauthAccounts: [...]` push), update picture/displayName if blank.
+3. **Otherwise create new user** with Google's `email`, `name`, `picture`.
+
+Sets `access_token` cookie, redirects to:
+
+- `https://polyscript.io/signup` if user is **pending** (no handle yet)
+- `https://polyscript.io/` if onboarded
+
+## Scopes
+
+We request the minimum:
+
+- `openid` — receive Google's stable `sub` (user ID)
+- `email` — email + email_verified
+- `profile` — name + picture
+
+No sensitive scopes (Drive, Calendar, etc.) — no extra Google verification needed.
+
+## Account linking
+
+If a user already has an account with `email@example.com` (created via email-password signup) and later signs in with Google using the same email, the Google account is **automatically linked**. `oauthAccounts` array gets a new entry; user keeps the existing handle, password, and history.
+
+## Display name from Google
+
+For new accounts: Google's `name` field is copied to `users.displayName` automatically. User can override during onboarding. For account linking: only fills `displayName` if it was previously empty.
+
+## Errors
+
+| Status | Error | Cause |
+|---|---|---|
+| 400 | `oauth_error` | Google rejected the exchange (code expired / invalid state) |
+| 400 | `no_userinfo` | Google response missing userinfo |
+| 403 | `email_not_verified` | Google's `email_verified` claim is false |

@@ -1,0 +1,97 @@
+---
+title: "Email verify / resend / change"
+description: "6-digit code verification flow for signup and email-change."
+---
+
+The same `/auth/email/verify` endpoint handles both signup verification and email-change confirmation. The server distinguishes by the `purpose` field stored in the verification record (`signup` | `email_change`).
+
+## Verify
+
+```http
+POST /auth/email/verify
+Cookie: access_token=...
+Content-Type: application/json
+```
+
+```json
+{ "code": "439821" }
+```
+
+<ParamField body="code" type="string" required>
+  6-digit numeric code received via email.
+</ParamField>
+
+### Response
+
+```json
+{ "ok": true }
+```
+
+Refreshes the session cookie (now non-pending for signup, or with new email for email_change).
+
+### Errors
+
+| Status | Error | Cause |
+|---|---|---|
+| 400 | `expired_or_burned` | Code expired (>5 min) or attempts ≥ 5 |
+| 400 | `wrong_code` | Bad code. Response includes `attempts_left` |
+
+```json
+{
+  "error": "wrong_code",
+  "message": "Incorrect code.",
+  "attempts_left": 3
+}
+```
+
+---
+
+## Resend
+
+```http
+POST /auth/email/resend
+Cookie: access_token=...
+```
+
+Issues a new code, resets attempts, sends another email. No body required.
+
+```json
+{ "ok": true }
+```
+
+### Errors
+
+- `400 no_verification_in_progress` — no pending verify for this user
+- `429` — more than 5 resends/hour
+
+---
+
+## Change email
+
+```http
+POST /auth/email/change
+Cookie: access_token=...
+Content-Type: application/json
+```
+
+```json
+{
+  "newEmail": "new@example.com",
+  "password": "current_password"
+}
+```
+
+<ParamField body="newEmail" type="string" required />
+<ParamField body="password" type="string" required>
+  Re-confirms identity. OAuth-only accounts (no password) get `password_required` error.
+</ParamField>
+
+A 6-digit code is sent to `newEmail`. After verifying via `/auth/email/verify`, `users.email` is updated and the **old address** receives a notification email (hijacking-detection signal).
+
+### Errors
+
+- `400 invalid_email`
+- `400 email_taken`
+- `401 wrong_password`
+- `409 verification_in_progress` — another verify already pending for this user
+- `400 password_required` — OAuth-only user without password set
