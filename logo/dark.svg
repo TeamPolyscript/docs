@@ -1,8 +1,8 @@
 <svg width="180" height="32" viewBox="0 0 180 32" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(0, 4)">
-    <rect x="0" y="0" width="24" height="24" rx="4.5" ry="4.5" fill="#0052ff" />
-    <polygon points="19.2,12 15.6,18.24 8.4,18.24 4.8,12 8.4,5.76 15.6,5.76" fill="#ffffff" stroke="#ffffff" stroke-width="1.68" stroke-linejoin="round" />
-    <polygon points="12,8.88 14.7,10.44 14.7,13.56 12,15.12 9.3,13.56 9.3,10.44" fill="#0052ff" stroke="#0052ff" stroke-width="0.72" stroke-linejoin="round" />
-  </g>
+  <svg x="0" y="4" width="24" height="24" viewBox="0 0 93 93">
+    <g transform="translate(46.5 46.5) scale(0.805) translate(-46.194 -46.194)">
+      <path d="M92.388 27.06v38.268l-27.06 27.06H27.06L0 65.328V27.06L27.06 0h38.268zm-60.755 4.368v30h30v-30z" fill="#0052ff"/>
+    </g>
+  </svg>
   <text x="34" y="22" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-weight="600" font-size="18" fill="#fafafa" letter-spacing="-0.01em">Polyscript</text>
 </svg>
