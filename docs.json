@@ -36,7 +36,7 @@
       },
       {
         "group": "Legal",
-        "pages": ["privacy", "terms"]
+        "pages": ["privacy", "terms", "security"]
       }
     ]
   },

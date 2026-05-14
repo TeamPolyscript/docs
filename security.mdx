@@ -1,0 +1,50 @@
+---
+title: "Security"
+description: "How Polyscript handles security, vulnerability reports, and incident response."
+---
+
+<Note>Last updated: May 14, 2026</Note>
+
+<Warning>
+  This document is a working draft and will be revised as the platform matures.
+</Warning>
+
+## Overview
+
+This page summarizes how Polyscript approaches security, how to report a vulnerability, and what to expect if a security incident affects you.
+
+## Reporting a vulnerability
+
+If you believe you have found a security vulnerability in Polyscript — the desktop application, SDK, MCP server, or web services — please email <a href="mailto:security@polyscript.io">security@polyscript.io</a>. Include a description of the issue, steps to reproduce, and any proof-of-concept materials where applicable.
+
+Please do not disclose the issue publicly or attempt to exploit it against other users until we have had a reasonable opportunity to investigate and address it. We aim to acknowledge reports within three business days.
+
+## Data security
+
+### In transit
+
+All traffic between the desktop application, the SDK, and our services is sent over TLS.
+
+### At rest
+
+Account data and operational records are stored with encryption provided by our hosting providers.
+
+### Secrets management
+
+Application secrets used to operate our services (such as third-party API keys) are managed through a dedicated secrets platform and are not committed to source control.
+
+## Account & session security
+
+Sessions are authenticated through an httpOnly cookie. You can review and revoke connected devices at any time from your profile. Revoking a device immediately invalidates its session.
+
+## Strategy & key handling
+
+Strategy code that you author or install runs locally on your machine through the Polyscript desktop application. Any keys you provide to authenticate with Polymarket are stored locally on your device; Polyscript does not transmit or persist those keys on our servers.
+
+## Incident response
+
+If a security incident affects you, we will notify you using the email address on file with a description of what happened, what we know about the impact, and any actions you should take. Material incidents may also be disclosed publicly.
+
+## Contact
+
+Security questions or reports: <a href="mailto:security@polyscript.io">security@polyscript.io</a>.
